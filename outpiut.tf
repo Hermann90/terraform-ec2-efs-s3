@@ -7,7 +7,7 @@ output "s3_bucket_id" {
 
 # EFS volume ID
 output "efs_volume_id" {
-  value     = aws_efs_file_system.NetSPI_file_system.id
+  value     = aws_efs_file_system.netspi_file_system.id
 }
 
 # EC2 instance ID
@@ -23,4 +23,14 @@ output "security_group_id" {
 # Subnet ID
 output "subnet_id" {
   value     = aws_default_subnet.default_az1.id
+}
+
+# public ip ID
+output "public_ip" {
+  value     = aws_instance.ec2_instance.public_ip
+}
+
+# public ip ID
+output "aws_efs_file_system" {
+  value     = aws_efs_file_system.netspi_file_system.dns_name
 }

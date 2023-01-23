@@ -41,19 +41,19 @@ data "aws_ami" "amazon_linux_2" {
 }
 
 # Generates a secure private key and encodes it as PEM
-resource "tls_private_key" "jenkins_key" {
+resource "tls_private_key" "ssh_key_for_connection" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 # Create the Key Pair
-resource "aws_key_pair" "jenkins_key" {
+resource "aws_key_pair" "ssh_key_for_connection" {
   key_name   = "ec2_key_pair"  
-  public_key = tls_private_key.jenkins_key.public_key_openssh
+  public_key = tls_private_key.ssh_key_for_connection.public_key_openssh
 }
 # Save file
 resource "local_file" "ssh_key" {
-  filename = "${aws_key_pair.jenkins_key.key_name}.pem"
-  content  = tls_private_key.jenkins_key.private_key_pem
+  filename = "${aws_key_pair.ssh_key_for_connection.key_name}.pem"
+  content  = tls_private_key.ssh_key_for_connection.private_key_pem
 }
 
 # launch the ec2 instance and install jenkis
@@ -62,7 +62,7 @@ resource "aws_instance" "ec2_instance" {
   instance_type          = var.aws_instance_type
   subnet_id              = aws_default_subnet.default_az1.id
   vpc_security_group_ids = [aws_security_group.ssh_ec2_security_group.id]
-  key_name               = aws_key_pair.jenkins_key.key_name
+  key_name               = aws_key_pair.ssh_key_for_connection.key_name
   #user_data            = file("myfile.sh")
 
   tags = {
@@ -71,14 +71,14 @@ resource "aws_instance" "ec2_instance" {
 }
 
 # an empty resource block
-resource "null_resource" "name" {
-  # ssh into the ec2 instance 
-  connection {
-    type        = "ssh"
-    user        = "ec2-user"
-    private_key = file(local_file.ssh_key.filename)
-    host        = aws_instance.ec2_instance.public_ip
-  }
-  # wait for ec2 to be created
-  depends_on = [aws_instance.ec2_instance]
-}
+# resource "null_resource" "name" {
+#   # ssh into the ec2 instance 
+#   connection {
+#     type        = "ssh"
+#     user        = "ec2-user"
+#     private_key = file(local_file.ssh_key.filename)
+#     host        = aws_instance.ec2_instance.public_ip
+#   }
+#   # wait for ec2 to be created
+#   depends_on = [aws_instance.ec2_instance]
+# }
